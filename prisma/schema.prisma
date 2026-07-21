@@ -1,0 +1,393 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== ADMIN USER ====================
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password           String?
+  name               String?
+  image              String?
+  role               String    @default("user") // "admin", "user"
+  verified           Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  students           Student[]
+  contactMessages    ContactMessage[]
+  quoteRequests      QuoteRequest[]
+}
+
+// ==================== STUDENT MANAGEMENT ====================
+model Student {
+  id                 String    @id @default(cuid())
+  registrationId     String    @unique
+  name               String
+  email              String    @unique
+  phone              String
+  qualification      String
+  currentProfession  String?
+  selectedCourse     String
+  preferredBatch     String?
+  registrationDate   DateTime  @default(now())
+  status             String    @default("active") // "active", "completed", "cancelled"
+  adminNotes         String?
+  paymentStatus      String    @default("pending") // "pending", "paid", "failed"
+  enrollmentStatus   String    @default("registered") // "registered", "ongoing", "completed"
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  payments           Payment[]
+  orders             Order[]
+
+  @@index([registrationId])
+  @@index([email])
+  @@index([userId])
+}
+
+// ==================== QUOTE REQUESTS ====================
+model QuoteRequest {
+  id                 String    @id @default(cuid())
+  email              String
+  phone              String
+  name               String?
+  company            String?
+  projectType        String    // "architectural", "structural", "mep", etc.
+  service            String?
+  description        String?
+  timeline           String?
+  budget             String?
+  status             String    @default("new") // "new", "in_progress", "completed", "cancelled"
+  notes              String?
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([userId])
+}
+
+// ==================== CONTACT MESSAGES ====================
+model ContactMessage {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String
+  phone              String?
+  message            String
+  isRead             Boolean   @default(false)
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([email])
+  @@index([isRead])
+  @@index([userId])
+}
+
+// ==================== COURSES ====================
+model Course {
+  id                 String    @id @default(cuid())
+  name               String
+  slug               String    @unique
+  description        String
+  detailedDescription String?
+  banner             String?
+  autodesk_badge     String?   // Autodesk certification name
+  duration           String?   // e.g., "30 days", "12 weeks"
+  level              String?   // "beginner", "intermediate", "advanced"
+  price              Decimal?  @db.Decimal(10, 2)
+  curriculum         String?   // Rich text
+  faqs               FAQ[]     @relation("CourseFAQs")
+  isPublished        Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([isPublished])
+}
+
+// ==================== SERVICES ====================
+model Service {
+  id                 String    @id @default(cuid())
+  name               String
+  slug               String    @unique
+  description        String
+  detailedDescription String?
+  icon               String?   // Icon URL or name
+  image              String?
+  features           String?   // JSON array or rich text
+  cta                String?
+  isPublished        Boolean   @default(true)
+  isVisible          Boolean   @default(true)
+  order              Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  projects           Project[] @relation("ServiceProjects")
+
+  @@index([slug])
+  @@index([isPublished])
+  @@index([order])
+}
+
+// ==================== SOFTWARE SERVICES ====================
+model SoftwareService {
+  id                 String    @id @default(cuid())
+  name               String    // e.g., "Autodesk Revit", "Civil 3D"
+  slug               String    @unique
+  description        String
+  icon               String?
+  isPublished        Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+// ==================== PROJECTS ====================
+model Project {
+  id                 String    @id @default(cuid())
+  name               String
+  slug               String    @unique
+  description        String
+  detailedDescription String?
+  coverImage         String?
+  images             ProjectImage[]
+  industry           String    // e.g., "Commercial", "Residential", "Infrastructure"
+  serviceId          String?
+  service            Service?  @relation("ServiceProjects", fields: [serviceId], references: [id], onDelete: SetNull)
+  softwaresUsed      String?   // JSON array of software names
+  challenge          String?
+  solution           String?
+  deliverables       String?
+  isPublished        Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([industry])
+  @@index([isPublished])
+}
+
+model ProjectImage {
+  id                 String    @id @default(cuid())
+  url                String
+  caption            String?
+  order              Int       @default(0)
+  projectId          String
+  project            Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+
+  @@index([projectId])
+}
+
+// ==================== BLOG ====================
+model BlogPost {
+  id                 String    @id @default(cuid())
+  title              String
+  slug               String    @unique
+  content            String    // Rich text content
+  excerpt            String?
+  featuredImage      String?
+  category           BlogCategory? @relation(fields: [categoryId], references: [id])
+  categoryId         String?
+  seoTitle           String?
+  seoDescription     String?
+  status             String    @default("draft") // "draft", "published", "scheduled"
+  publishedAt        DateTime?
+  scheduledFor       DateTime?
+  readingTime        Int?      // in minutes
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+}
+
+model BlogCategory {
+  id                 String    @id @default(cuid())
+  name               String    @unique
+  slug               String    @unique
+  description        String?
+  posts              BlogPost[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+// ==================== FAQ ====================
+model FAQ {
+  id                 String    @id @default(cuid())
+  question           String
+  answer             String    // Rich text
+  courseId           String?
+  course             Course?   @relation("CourseFAQs", fields: [courseId], references: [id], onDelete: Cascade)
+  order              Int       @default(0)
+  isPublished        Boolean   @default(true)
+  isVisible          Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([courseId])
+  @@index([order])
+}
+
+// ==================== TESTIMONIALS ====================
+model Testimonial {
+  id                 String    @id @default(cuid())
+  name               String
+  role               String?
+  company            String?
+  image              String?
+  content            String
+  rating             Int?      // 1-5 stars
+  isPublished        Boolean   @default(true)
+  isVisible          Boolean   @default(true)
+  order              Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([isPublished])
+  @@index([order])
+}
+
+// ==================== MEDIA LIBRARY ====================
+model MediaItem {
+  id                 String    @id @default(cuid())
+  url                String
+  filename           String
+  size               Int       // in bytes
+  type               String    // "image", "video", "document"
+  mimeType           String    // e.g., "image/jpeg"
+  category           String?   // "course", "project", "blog", "gallery", "logo"
+  storagePath        String?   // Path in storage provider
+  createdAt          DateTime  @default(now())
+
+  @@index([type])
+  @@index([category])
+}
+
+// ==================== WEBSITE SETTINGS ====================
+model WebsiteSettings {
+  id                 String    @id @default(cuid())
+  companyName        String    @default("CATABIM")
+  companyLogo        String?
+  advisorPhoneNumber String?   // Used for "Talk to Advisor"
+  officePhoneNumber  String?
+  companyEmail       String?
+  officeAddress      String?
+  googleMapsUrl      String?
+  workingHours       String?   // JSON object
+  facebookUrl        String?
+  instagramUrl       String?
+  linkedinUrl        String?
+  youtubeUrl         String?
+  whatsappNumber     String?
+  updatedAt          DateTime  @updatedAt
+}
+
+// ==================== CMS CONTENT ====================
+model CMSContent {
+  id                 String    @id @default(cuid())
+  key                String    @unique // e.g., "homepage_hero", "about_us_intro"
+  content            String    // Rich text or JSON
+  updatedAt          DateTime  @updatedAt
+
+  @@index([key])
+}
+
+// ==================== PAYMENT & ORDERS ====================
+model Order {
+  id                 String    @id @default(cuid())
+  orderId            String    @unique
+  studentId          String
+  student            Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseName         String
+  amount             Decimal   @db.Decimal(10, 2)
+  currency           String    @default("INR")
+  status             String    @default("pending") // "pending", "paid", "failed", "cancelled"
+  paymentMethod      String?   // "razorpay", "stripe", etc.
+  description        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  payment            Payment?
+  invoice            Invoice?
+  receipt            Receipt?
+
+  @@index([studentId])
+  @@index([status])
+  @@index([orderId])
+}
+
+model Payment {
+  id                 String    @id @default(cuid())
+  paymentId          String    @unique
+  studentId          String
+  student            Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  orderId            String    @unique
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount             Decimal   @db.Decimal(10, 2)
+  currency           String    @default("INR")
+  status             String    @default("pending") // "pending", "authorized", "captured", "failed", "refunded"
+  paymentGateway     String?   // "razorpay", "stripe"
+  transactionId      String?   // Gateway transaction ID
+  errorMessage       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([paymentId])
+}
+
+model Invoice {
+  id                 String    @id @default(cuid())
+  invoiceNumber      String    @unique
+  orderId            String    @unique
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  studentName        String
+  studentEmail       String
+  amount             Decimal   @db.Decimal(10, 2)
+  issuedAt           DateTime  @default(now())
+  dueDate            DateTime?
+  paidAt             DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([invoiceNumber])
+  @@index([orderId])
+}
+
+model Receipt {
+  id                 String    @id @default(cuid())
+  receiptNumber      String    @unique
+  orderId            String    @unique
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentAmount      Decimal   @db.Decimal(10, 2)
+  paymentDate        DateTime
+  paymentMethod      String
+  transactionId      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([receiptNumber])
+  @@index([orderId])
+}
