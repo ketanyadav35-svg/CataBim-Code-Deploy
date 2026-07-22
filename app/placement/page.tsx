@@ -5,7 +5,6 @@ import { useInView } from 'framer-motion'
 import {
   FileText,
   FolderOpen,
-  Linkedin,
   Briefcase,
   Search,
   Compass,
@@ -22,11 +21,6 @@ const services = [
     icon: FolderOpen,
     title: 'Portfolio Guidance',
     description: 'Guidance on building a professional portfolio that showcases your BIM projects, models, and course work.',
-  },
-  {
-    icon: Linkedin,
-    title: 'LinkedIn Profile Building',
-    description: 'Help creating a compelling LinkedIn profile that presents your skills clearly to the AEC community.',
   },
   {
     icon: Briefcase,
