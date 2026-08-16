@@ -250,7 +250,7 @@ export default function AboutPage() {
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Button
-              render={<a href="/training" />}
+              render={<a href="/#training" />}
               nativeButton={false}
               size="lg"
               className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
