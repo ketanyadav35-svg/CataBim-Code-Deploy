@@ -167,6 +167,13 @@ export function RegistrationForm({ defaultCourse }: { defaultCourse?: string }) 
         </div>
       )}
 
+      <div className="flex justify-start">
+        <Turnstile
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken(null)}
+        />
+      </div>
+
       <button
         type="submit"
         disabled={isSubmitting}

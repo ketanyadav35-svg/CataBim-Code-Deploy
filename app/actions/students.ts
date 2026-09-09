@@ -61,6 +61,8 @@ export async function registerStudent(data: unknown) {
       }
     }
 
+     console.error('Student registration error:', error)
+
     return {
       success: false,
       error: 'An error occurred during registration',
