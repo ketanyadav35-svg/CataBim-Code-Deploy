@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle, AlertCircle, Loader } from 'lucide-react'
@@ -29,6 +29,14 @@ export function RegistrationForm({ defaultCourse }: { defaultCourse?: string }) 
     resolver: zodResolver(studentRegistrationSchema),
     defaultValues: { selectedCourse: defaultCourse ?? '' },
   })
+
+  const handleCaptchaVerify = useCallback((token: string) => {
+  setCaptchaToken(token)
+  }, [])
+
+  const handleCaptchaExpire = useCallback(() => {
+  setCaptchaToken(null)
+  }, [])
 
   const onSubmit = async (data: StudentRegistration) => {
     setError(null)
@@ -169,9 +177,9 @@ export function RegistrationForm({ defaultCourse }: { defaultCourse?: string }) 
 
       <div className="flex justify-start">
         <Turnstile
-          onVerify={setCaptchaToken}
-          onExpire={() => setCaptchaToken(null)}
-        />
+        onVerify={handleCaptchaVerify}
+        onExpire={handleCaptchaExpire}
+      />
       </div>
 
       <button
