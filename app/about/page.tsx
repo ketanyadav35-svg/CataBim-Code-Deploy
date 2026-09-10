@@ -243,7 +243,7 @@ export default function AboutPage() {
       <section className="bg-background py-16 md:py-24">
         <div className="mx-auto max-w-4xl text-center px-4 md:px-6">
           <h2 className="font-serif text-3xl font-bold text-foreground">
-            Ready to Transform Your Career?
+            Ready to Transform Your Career ?
           </h2>
           <p className="mt-4 text-muted-foreground">
             Advance your career with practical, project-based CATABIM training and mentorship.
