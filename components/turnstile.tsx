@@ -1,18 +1,22 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
-// Cloudflare Turnstile site key. Falls back to Cloudflare's public "always passes"
-// test key so the widget works in preview before real keys are configured.
-const SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 declare global {
   interface Window {
     turnstile?: {
-      render: (el: HTMLElement, options: Record<string, unknown>) => string
+      render: (
+        el: HTMLElement,
+        options: {
+          sitekey: string
+          callback?: (token: string) => void
+          'expired-callback'?: () => void
+          'error-callback'?: () => void
+        }
+      ) => string
       remove: (id: string) => void
-      reset: (id?: string) => void
     }
   }
 }
@@ -25,55 +29,86 @@ type TurnstileProps = {
 export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetId = useRef<string | null>(null)
+  const onVerifyRef = useRef(onVerify)
+  const onExpireRef = useRef(onExpire)
 
-  const render = useCallback(() => {
-    if (!window.turnstile || !containerRef.current || widgetId.current !== null) {
-      return
-    }
-    widgetId.current = window.turnstile.render(containerRef.current, {
-      sitekey: SITE_KEY,
-      callback: (token: string) => onVerify(token),
-      'expired-callback': () => onExpire?.(),
-      'error-callback': () => onExpire?.(),
-    })
+  useEffect(() => {
+    onVerifyRef.current = onVerify
+    onExpireRef.current = onExpire
   }, [onVerify, onExpire])
 
   useEffect(() => {
+    if (!SITE_KEY) {
+      console.error('NEXT_PUBLIC_TURNSTILE_SITE_KEY is missing')
+      return
+    }
+
     const scriptId = 'cf-turnstile-script'
-    let interval: ReturnType<typeof setInterval> | undefined
+
+    const renderWidget = () => {
+      if (
+        !window.turnstile ||
+        !containerRef.current ||
+        widgetId.current !== null
+      ) {
+        return
+      }
+
+      widgetId.current = window.turnstile.render(containerRef.current, {
+        sitekey: SITE_KEY,
+        callback: (token: string) => {
+          console.log('Turnstile verified')
+          onVerifyRef.current(token)
+        },
+        'expired-callback': () => {
+          onExpireRef.current?.()
+        },
+        'error-callback': () => {
+          onExpireRef.current?.()
+        },
+      })
+    }
 
     if (window.turnstile) {
-      render()
-    } else if (!document.getElementById(scriptId)) {
-      const script = document.createElement('script')
-      script.id = scriptId
-      script.src =
-        'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-      script.async = true
-      script.defer = true
-      script.onload = render
-      document.head.appendChild(script)
+      renderWidget()
     } else {
-      interval = setInterval(() => {
-        if (window.turnstile) {
-          clearInterval(interval)
-          render()
-        }
-      }, 200)
+      let script = document.getElementById(
+        scriptId
+      ) as HTMLScriptElement | null
+
+      if (!script) {
+        script = document.createElement('script')
+        script.id = scriptId
+        script.src =
+          'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+        script.async = true
+        script.defer = true
+        script.onload = renderWidget
+        document.head.appendChild(script)
+      } else {
+        const interval = window.setInterval(() => {
+          if (window.turnstile) {
+            window.clearInterval(interval)
+            renderWidget()
+          }
+        }, 200)
+
+        return () => window.clearInterval(interval)
+      }
     }
 
     return () => {
-      if (interval) clearInterval(interval)
       if (widgetId.current !== null && window.turnstile) {
         try {
           window.turnstile.remove(widgetId.current)
         } catch {
-          // widget already removed
+          // Widget already removed
         }
+
         widgetId.current = null
       }
     }
-  }, [render])
+  }, [])
 
   return <div ref={containerRef} className="min-h-[65px]" />
 }
