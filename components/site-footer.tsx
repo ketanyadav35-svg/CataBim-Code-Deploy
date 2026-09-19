@@ -1,5 +1,6 @@
-import { Boxes, Phone, Mail } from 'lucide-react'
+import { Phone, Mail } from 'lucide-react'
 import { site } from '@/lib/site'
+import Image from 'next/image'
 import { NewsletterSignup } from '@/components/newsletter-signup'
 
 export function SiteFooter() {
@@ -19,16 +20,15 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
-          <div className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Boxes className="size-5" aria-hidden="true" />
-            </span>
-            <div className="flex flex-col leading-none">
-              <span className="font-serif text-lg font-semibold text-foreground">
-                {site.name}
-              </span>
+          <div className="flex items-center">
+              <Image
+                src="/logo.jpeg"
+                alt="CataBIM"
+                width={180}
+                height={60}
+                className="h-auto w-[180px] object-contain"
+              />
             </div>
-          </div>
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
             <a

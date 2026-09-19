@@ -13,7 +13,7 @@ const navLinks = [
   { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/#contact' },
 ]
-
+  
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
 

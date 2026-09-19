@@ -57,9 +57,9 @@ export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
       widgetId.current = window.turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,
         callback: (token: string) => {
-          console.log('Turnstile verified')
-          onVerifyRef.current(token)
-        },
+  console.log('TURNSTILE TOKEN RECEIVED:', token)
+  onVerifyRef.current(token)
+},
         'expired-callback': () => {
           onExpireRef.current?.()
         },

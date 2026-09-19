@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import { useInView } from 'framer-motion'
+
 import {
   Award,
   BadgeCheck,
@@ -13,6 +14,7 @@ import {
   Handshake,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button-catabim'
+import { SiteHeader } from '@/components/site-header'
 
 const values = [
   {
@@ -62,6 +64,9 @@ export default function AboutPage() {
   const isInView = useInView(ref, { once: true, amount: 0.2 })
 
   return (
+     <>
+    <SiteHeader />
+    
     <main className="flex flex-col">
       {/* Hero Section */}
       <section className="bg-primary py-24 text-primary-foreground">
@@ -270,5 +275,7 @@ export default function AboutPage() {
         </div>
       </section>
     </main>
+      </>
   )
+  
 }

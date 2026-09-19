@@ -50,7 +50,7 @@ export function HeroSection() {
               Call {site.phone}
             </Button>
             <Button
-              render={<a href="#contact" />}
+              render={<a href="/request-quote" />}
               nativeButton={false}
               size="lg"
               variant="outline"
