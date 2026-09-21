@@ -5,7 +5,7 @@ import { NewsletterSignup } from '@/components/newsletter-signup'
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-background">
+    <footer id="contact" className="border-t border-border bg-background">
       <div className="mx-auto max-w-6xl px-4 py-12 md:px-6">
         <div className="mb-10 rounded-xl border border-border bg-card/50 p-8">
           <h3 className="text-lg font-semibold text-foreground">

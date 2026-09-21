@@ -12,7 +12,6 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   message: z.string().min(10, 'Message must be at least 10 characters'),
-  projectType: z.enum(['architectural', 'structural', 'mep', 'infrastructure', 'coordination', 'training', 'other']),
 })
 
 type ContactFormData = z.infer<typeof contactSchema>
@@ -43,8 +42,14 @@ export function ContactForm() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to send message')
-      }
+  const errorData = await response.json()
+console.log('Contact API error:', errorData)
+throw new Error(
+  errorData.errors?.map((e: any) => e.message).join(', ') ||
+  errorData.message ||
+  'Failed to send message'
+)
+}
 
       setSubmitted(true)
       reset()
@@ -116,27 +121,7 @@ export function ContactForm() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="projectType" className="text-sm font-medium text-primary-foreground">
-          Project Type *
-        </label>
-        <select
-          {...register('projectType')}
-          className="rounded-lg border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-2.5 text-primary-foreground transition-colors focus:border-accent focus:bg-primary-foreground/15 focus:outline-none"
-        >
-          <option value="">Select a project type...</option>
-          <option value="architectural">Architectural BIM</option>
-          <option value="structural">Structural BIM</option>
-          <option value="mep">MEP BIM</option>
-          <option value="infrastructure">Infrastructure BIM</option>
-          <option value="coordination">Coordination & QA/QC</option>
-          <option value="training">Training</option>
-          <option value="other">Other</option>
-        </select>
-        {errors.projectType && (
-          <span className="text-xs text-accent">{errors.projectType.message}</span>
-        )}
-      </div>
+    
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="message" className="text-sm font-medium text-primary-foreground">

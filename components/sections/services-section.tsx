@@ -100,7 +100,9 @@ export function ServicesSection() {
               <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
                 Beyond training and services, we help learners present themselves
                 professionally to the AEC industry with dedicated career support.
-                We provide guidance and resources — we do not guarantee placements.
+                We provide guidance and resources.We provide guaranteed placement 
+                assistance to every student.Your final placement depends on your skills, 
+                dedication, attendance, interview performance, and successful completion of the course.
               </p>
               <Link
                 href="/placement"

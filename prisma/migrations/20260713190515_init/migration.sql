@@ -43,7 +43,7 @@ CREATE TABLE "QuoteRequest" (
     "phone" TEXT NOT NULL,
     "name" TEXT,
     "company" TEXT,
-    "projectType" TEXT NOT NULL,
+    "projectType" TEXT,
     "service" TEXT,
     "description" TEXT,
     "timeline" TEXT,

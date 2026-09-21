@@ -82,7 +82,7 @@ export default async function ServicePage({
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
               <Button
-                render={<a href={site.phoneHref} />}
+                render={<a href="/#contact" />}
                 nativeButton={false}
                 size="lg"
                 variant="outline"

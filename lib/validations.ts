@@ -20,7 +20,7 @@ export const quoteRequestSchema = z.object({
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone must be at least 10 digits'),
   company: z.string().optional(),
-  projectType: z.string().min(1, 'Project type is required'),
+ // projectType: z.string().min(1, 'Project type is required'),
   service: z.string().optional(),
   description: z.string().optional(),
   timeline: z.string().optional(),
